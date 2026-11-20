@@ -1,25 +1,61 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
+import { toast } from "sonner";
 import { buttonVariants } from "@/components/ui/button";
+import { authClient, useSession } from "@/lib/auth-client";
+import { getRoleHome } from "@/lib/roles";
 import Logo from "./Logo";
-
-const links = [
-  { href: "/", label: "Home" },
-  { href: "/menu", label: "Browse Menu" },
-];
+import UserMenu from "./UserMenu";
+import UserAvatar from "./UserAvatar";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const { data: session, isPending } = useSession();
+  const user = session?.user;
+  const blockedHandled = useRef(false);
+
+  const home = user ? getRoleHome(user.role) : null;
+
+  const links = [
+    { href: "/", label: "Home" },
+    { href: "/menu", label: "Browse Menu" },
+    ...(user ? [{ href: home, label: "Dashboard" }] : []),
+  ];
+
+  const isActive = (href) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   const linkClass = (href) =>
     `text-sm font-medium transition-colors hover:text-primary ${
-      pathname === href ? "text-primary" : "text-foreground/80"
+      isActive(href) ? "text-primary" : "text-foreground/80"
     }`;
+
+  const handleLogout = async () => {
+    setOpen(false);
+    await authClient.signOut();
+    toast.success("Logged out successfully");
+    router.push("/");
+    router.refresh();
+  };
+
+
+  useEffect(() => {
+    if (user?.isBlocked && !blockedHandled.current) {
+      blockedHandled.current = true;
+      toast.error("Your account has been blocked. Please contact support.");
+      authClient.signOut().then(() => {
+        router.push("/");
+        router.refresh();
+      });
+    }
+    if (!user) blockedHandled.current = false;
+  }, [user, router]);
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/90 backdrop-blur">
@@ -35,13 +71,22 @@ export default function Navbar() {
           ))}
         </div>
 
+
         <div className="hidden items-center gap-3 md:flex">
-          <Link href="/signin" className={buttonVariants({ variant: "ghost" })}>
-            Sign In
-          </Link>
-          <Link href="/signup" className={buttonVariants()}>
-            Sign Up
-          </Link>
+          {isPending ? (
+            <div className="h-9 w-24 animate-pulse rounded-md bg-muted" />
+          ) : user ? (
+            <UserMenu user={user} onLogout={handleLogout} />
+          ) : (
+            <>
+              <Link href="/signin" className={buttonVariants({ variant: "ghost" })}>
+                Sign In
+              </Link>
+              <Link href="/signup" className={buttonVariants()}>
+                Sign Up
+              </Link>
+            </>
+          )}
         </div>
 
 
@@ -68,22 +113,49 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
-            <div className="flex gap-3">
-              <Link
-                href="/signin"
-                onClick={() => setOpen(false)}
-                className={buttonVariants({ variant: "outline" })}
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/signup"
-                onClick={() => setOpen(false)}
-                className={buttonVariants()}
-              >
-                Sign Up
-              </Link>
-            </div>
+
+            {isPending ? null : user ? (
+              <div className="space-y-3 border-t pt-4">
+                <div className="flex items-center gap-3">
+                  <UserAvatar user={user} className="h-10 w-10" />
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold">{user.name}</p>
+                    <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                  </div>
+                </div>
+                <Link
+                  href={`${home}/profile`}
+                  onClick={() => setOpen(false)}
+                  className={linkClass(`${home}/profile`)}
+                >
+                  Profile Settings
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="block text-left text-sm font-medium text-destructive"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-3">
+                <Link
+                  href="/signin"
+                  onClick={() => setOpen(false)}
+                  className={buttonVariants({ variant: "outline" })}
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/signup"
+                  onClick={() => setOpen(false)}
+                  className={buttonVariants()}
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       )}
