@@ -8,20 +8,9 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import SectionHeading from "@/components/shared/SectionHeading";
 import Reveal from "@/components/shared/Reveal";
 import MenuItemCard from "@/components/menu/MenuItemCard";
+import CardSkeleton from "@/components/menu/CardSkeleton";
 
-function CardSkeleton() {
-  return (
-    <div className="overflow-hidden rounded-2xl border bg-card">
-      <div className="aspect-[4/3] animate-pulse bg-muted" />
-      <div className="space-y-3 p-4">
-        <div className="h-3 w-1/3 animate-pulse rounded bg-muted" />
-        <div className="h-5 w-2/3 animate-pulse rounded bg-muted" />
-        <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
-        <div className="h-9 w-full animate-pulse rounded bg-muted" />
-      </div>
-    </div>
-  );
-}
+
 
 export default function FeaturedItems() {
   const [items, setItems] = useState([]);
