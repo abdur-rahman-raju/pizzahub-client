@@ -1,7 +1,17 @@
+import Hero from "@/components/home/Hero";
+import FeaturedItems from "@/components/home/FeaturedItems";
+import Categories from "@/components/home/Categories";
+import WhyChoose from "@/components/home/WhyChoose";
+import HowItWorks from "@/components/home/HowItWorks";
+
 export default function Home() {
   return (
-    <div className="flex min-h-[60vh] items-center justify-center">
-      <h1 className="text-4xl font-bold">PizzaHub</h1>
-    </div>
+    <>
+      <Hero />
+      <FeaturedItems />
+      <Categories />
+      <WhyChoose />
+      <HowItWorks />
+    </>
   );
 }
