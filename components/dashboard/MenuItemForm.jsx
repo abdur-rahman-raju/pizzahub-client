@@ -14,16 +14,19 @@ import { uploadImage } from "@/lib/upload-image";
 
 const MAX_IMAGES = 5;
 
-export default function MenuItemForm() {
+// item দিলে Edit মোড, না দিলে Add মোড
+export default function MenuItemForm({ item }) {
   const router = useRouter();
+  const isEdit = !!item;
+
   const [form, setForm] = useState({
-    itemName: "",
-    category: CATEGORIES[0].name,
-    description: "",
-    price: "",
-    location: "",
+    itemName: item?.itemName ?? "",
+    category: item?.category ?? CATEGORIES[0].name,
+    description: item?.description ?? "",
+    price: item?.price ?? "",
+    location: item?.location ?? "",
   });
-  const [images, setImages] = useState([]);
+  const [images, setImages] = useState(item?.images ?? []);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
@@ -73,18 +76,25 @@ export default function MenuItemForm() {
 
     setSaving(true);
     try {
-      await apiRequest("/api/menu-items", {
-        method: "POST",
-        body: {
-          itemName: form.itemName.trim(),
-          category: form.category,
-          description: form.description.trim(),
-          price: Number(form.price),
-          location: form.location.trim(),
-          images,
-        },
-      });
-      toast.success("Item submitted. It will go live after admin approval.");
+      const body = {
+        itemName: form.itemName.trim(),
+        category: form.category,
+        description: form.description.trim(),
+        price: Number(form.price),
+        location: form.location.trim(),
+        images,
+      };
+
+      if (isEdit) {
+        const res = await apiRequest(`/api/menu-items/${item._id}`, {
+          method: "PATCH",
+          body,
+        });
+        toast.success(res.message);
+      } else {
+        await apiRequest("/api/menu-items", { method: "POST", body });
+        toast.success("Item submitted. It will go live after admin approval.");
+      }
       router.push("/dashboard/vendor/menu-items");
     } catch (err) {
       toast.error(err.message);
@@ -102,6 +112,12 @@ export default function MenuItemForm() {
       className="grid max-w-3xl gap-5 rounded-2xl border bg-card p-5 shadow-sm sm:p-6"
       noValidate
     >
+      {isEdit && (item.status === "approved" || item.status === "rejected") && (
+        <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+          Saving changes will send this item back to the admin for review.
+        </p>
+      )}
+
       <div>
         <Label htmlFor="itemName">Item name</Label>
         <Input id="itemName" value={form.itemName} onChange={setField("itemName")} placeholder="Margherita Classic" />
@@ -175,10 +191,13 @@ export default function MenuItemForm() {
         {fieldError("images")}
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-3">
+        <Button type="button" variant="outline" onClick={() => router.back()} disabled={saving}>
+          Cancel
+        </Button>
         <Button type="submit" disabled={saving || uploading}>
           {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Submit for approval
+          {isEdit ? "Save changes" : "Submit for approval"}
         </Button>
       </div>
     </form>
