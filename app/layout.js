@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
@@ -16,7 +17,6 @@ export const metadata = {
     "Order hot and fresh pizza from local pizza shops. Browse menus, place orders and track them easily.",
 };
 
-
 const themeScript = `try{var t=localStorage.getItem("theme");if(t==="dark"||(!t&&window.matchMedia("(prefers-color-scheme: dark)").matches)){document.documentElement.classList.add("dark")}}catch(e){}`;
 
 export default function RootLayout({ children }) {
@@ -26,8 +26,22 @@ export default function RootLayout({ children }) {
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className={`${poppins.className} flex min-h-screen flex-col antialiased`}>
-        <Navbar />
-        <main className="flex-1">{children}</main>
+        <Suspense fallback={<div className="h-16" />}>
+          <Navbar />
+        </Suspense>
+
+        <main className="flex-1">
+          <Suspense
+            fallback={
+              <div className="flex min-h-[60vh] items-center justify-center">
+                <p>Loading...</p>
+              </div>
+            }
+          >
+            {children}
+          </Suspense>
+        </main>
+
         <Footer />
         <ThemeToggle />
         <Toaster position="top-center" richColors />

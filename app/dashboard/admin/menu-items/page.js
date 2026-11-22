@@ -11,7 +11,7 @@ import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { useApiData } from "@/lib/use-api-data";
 import { apiRequest } from "@/lib/api-private";
 import { formatPrice } from "@/lib/format";
-export const dynamic = "force-dynamic";
+// export const dynamic = "force-dynamic";
 
 const TABS = ["all", "pending", "approved", "rejected", "inactive"];
 
