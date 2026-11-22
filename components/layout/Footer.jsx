@@ -116,7 +116,7 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-background/10 py-4 text-center text-xs text-background/60">
-        © {new Date().getFullYear()} PizzaHub. All rights reserved.
+                © 2026 PizzaHub. All rights reserved.
       </div>
     </footer>
   );

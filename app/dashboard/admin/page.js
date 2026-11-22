@@ -2,10 +2,13 @@
 
 import Link from "next/link";
 import {
+  Clock,
+  CreditCard,
   DollarSign,
   Loader2,
   ShoppingBag,
   Store,
+  UserRound,
   UtensilsCrossed,
   Users,
 } from "lucide-react";
@@ -36,13 +39,15 @@ export default function AdminOverviewPage() {
     <div>
       <PageHeader title="Admin Overview" description="Platform activity at a glance" />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Total Users" value={data.totalUsers} icon={Users} />
-        <StatCard label="Vendors" value={data.users.vendor} icon={Store} tone="blue" />
-        <StatCard label="Menu Items" value={data.totalItems} icon={UtensilsCrossed} tone="amber" />
-        <StatCard label="Total Orders" value={data.totalOrders} icon={ShoppingBag} tone="gray" />
+        <StatCard label="Total Vendors" value={data.users.vendor} icon={Store} tone="blue" />
+        <StatCard label="Total Customers" value={data.users.customer} icon={UserRound} tone="primary" />
+        <StatCard label="Total Menu Items" value={data.totalItems} icon={UtensilsCrossed} tone="amber" />
+        <StatCard label="Pending Menu Items" value={data.items.pending} icon={Clock} tone="red" />
+        <StatCard label="Total Transactions" value={data.totalTransactions} icon={CreditCard} tone="gray" />
+        <StatCard label="Total Orders" value={data.totalOrders} icon={ShoppingBag} tone="blue" />
         <StatCard label="Premium Revenue" value={formatPrice(data.revenue)} icon={DollarSign} tone="green" />
-        <StatCard label="Customers" value={data.users.customer} icon={Users} tone="primary" />
       </div>
 
       {data.items.pending > 0 && (
